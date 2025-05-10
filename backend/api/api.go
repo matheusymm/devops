@@ -17,6 +17,7 @@ import (
 	"example/backend/config"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 )
 
@@ -28,10 +29,19 @@ type API struct {
 }
 
 func NewAPI(cfg *config.Config, h *handlers.Handlers) *API {
-
 	router := chi.NewRouter()
 
-	router.Use(middleware.RequestLogger)
+	router.Use(
+		middleware.RequestLogger,
+		cors.Handler(cors.Options{
+			AllowedOrigins:   []string{os.Getenv("FRONTEND_URL")}, // Frontend origin
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
+			MaxAge:           300, // Maximum value for preflight request cache
+		}),
+	)
 	routes.SetupRoutes(router, h)
 
 	return &API{

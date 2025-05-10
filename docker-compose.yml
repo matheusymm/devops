@@ -13,6 +13,7 @@ services:
       - project_network
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+      - ./backend/db/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   backend:
     build: ./backend
@@ -22,6 +23,8 @@ services:
     environment:
       DSN: postgresql://user:pass@postgresql:5432/project_db?sslmode=disable
       PORT: 8080
+      JWT_SECRET: f7afdb469d75f215b99de2d9c7c228a3e6b4ba928651c9c68a5c7b2f8c0fb827
+      FRONTEND_URL: http://localhost:3000
     restart: always
     networks:
       - project_network
@@ -33,6 +36,8 @@ services:
     container_name: frontend
     ports:
       - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
     restart: always
     networks:
       - project_network

@@ -6,7 +6,7 @@ import (
 )
 
 type UserRepositoryInterface interface {
-	Create(*models.User) (bool, error)
+	Create(*models.User) (string, error)
 	GetById(string) (*models.User, error)
 	GetAll() ([]*models.User, error)
 	Update(*models.User) (bool, error)
@@ -23,15 +23,15 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) Create(user *models.User) (bool, error) {	
+func (ur *UserRepository) Create(user *models.User) (string, error) {
 	query := "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id"
 
 	err := ur.db.QueryRow(query, user.Name, user.Email, user.Password).Scan(&user.Id)
 
 	if err != nil {
-		return false, err
+		return "", err
 	}
-	return true, nil
+	return user.Id.String(), nil
 }
 
 func (ur *UserRepository) GetById(id string) (*models.User, error) {
@@ -39,6 +39,18 @@ func (ur *UserRepository) GetById(id string) (*models.User, error) {
 	user := &models.User{}
 
 	err := ur.db.QueryRow(query, id).Scan(&user.Id, &user.Name, &user.Email)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (ur *UserRepository) GetByEmail(email string) (*models.User, error) {
+	query := "SELECT id, name, password FROM users WHERE email = $1"
+	user := &models.User{}
+
+	err := ur.db.QueryRow(query, email).Scan(&user.Id, &user.Name, &user.Password)
 
 	if err != nil {
 		return nil, err
@@ -78,8 +90,8 @@ func (ur *UserRepository) Update(user *models.User) (bool, error) {
 	if string(user.Password) != "" {
 		query += " password = $3,"
 	}
-	
-	query = query[:len(query)-1] + " WHERE id = $4" 
+
+	query = query[:len(query)-1] + " WHERE id = $4"
 	_, err := ur.db.Exec(query, user.Name, user.Email, user.Password, user.Id)
 
 	if err != nil {

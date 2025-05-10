@@ -7,6 +7,8 @@ import (
 
 	"example/backend/api/models"
 	"example/backend/db/repositories"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type MoodHandler struct {
@@ -27,7 +29,7 @@ func (mh *MoodHandler) CreateMood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := mh.MoodRepository.Create(&mood)	
+	result, err := mh.MoodRepository.Create(&mood)
 
 	if err != nil || !result {
 		http.Error(w, "failed to create mood", http.StatusInternalServerError)
@@ -38,8 +40,8 @@ func (mh *MoodHandler) CreateMood(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (mh *MoodHandler) GetMoodByUserId(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+func (mh *MoodHandler) GetMoodsByUserId(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
 	if id == "" {
 		http.Error(w, "missing user ID", http.StatusBadRequest)
 		return
