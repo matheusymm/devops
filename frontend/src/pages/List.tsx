@@ -25,8 +25,6 @@ const MoodList = () => {
     fetchMoods();
   }, []);
 
-  console.log(moods);
-
   return (
     <div className="flex flex-col bg-slate-300 w-screen h-screen">
       <Header />

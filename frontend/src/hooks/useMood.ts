@@ -11,7 +11,6 @@ const useMood = () => {
 
     const createMood = async (userId: string, mood: number, description: string) => {
         setLoading(true);
-        console.log(userId, mood, description);
         await api.post('/moods/', { user_id: userId, mood, description })
             .then((response) => {
                 console.log(response.data);

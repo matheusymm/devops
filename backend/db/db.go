@@ -13,6 +13,16 @@ import (
 
 func Connect(cfg *config.Config) (*sql.DB, error) {
 	fmt.Printf("Connecting to database with DSN: %s\n", cfg.DB.DSN)
+	for {
+		db, err := sql.Open("postgres", cfg.DB.DSN)
+		if err == nil {
+			if err = db.Ping(); err == nil {
+				break
+			}
+		}
+		fmt.Printf("Waiting for postgresql...")
+		time.Sleep(2 * time.Second)
+	}
 	db, err := sql.Open("postgres", cfg.DB.DSN)
 	if err != nil {
 		return nil, err
@@ -22,9 +32,9 @@ func Connect(cfg *config.Config) (*sql.DB, error) {
 	db.SetMaxIdleConns(cfg.DB.MaxIdleConns)
 
 	maxIdleTime := cfg.DB.MaxIdleTime
-    if maxIdleTime == "" {
-        maxIdleTime = "5m" // Default to 5 minutes if not set
-    }
+	if maxIdleTime == "" {
+		maxIdleTime = "5m" // Default to 5 minutes if not set
+	}
 	duration, err := time.ParseDuration(maxIdleTime)
 	if err != nil {
 		return nil, err

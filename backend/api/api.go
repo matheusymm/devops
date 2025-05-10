@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -31,15 +32,17 @@ type API struct {
 func NewAPI(cfg *config.Config, h *handlers.Handlers) *API {
 	router := chi.NewRouter()
 
+	allowedOrigins := strings.Split(os.Getenv("FRONTEND_URL"), ",")
+
 	router.Use(
 		middleware.RequestLogger,
 		cors.Handler(cors.Options{
-			AllowedOrigins:   []string{os.Getenv("FRONTEND_URL")}, // Frontend origin
+			AllowedOrigins:   allowedOrigins,
 			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
 			AllowCredentials: true,
-			MaxAge:           300, // Maximum value for preflight request cache
+			MaxAge:           300,
 		}),
 	)
 	routes.SetupRoutes(router, h)

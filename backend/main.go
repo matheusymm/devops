@@ -6,20 +6,20 @@ import (
 	"example/backend/db"
 	"fmt"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
 func main() {
 
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file", zap.Error(err))
-	}
+	// err := godotenv.Load("/app/.env")
+	// if err != nil {
+	// 	fmt.Println("Error loading .env file", zap.Error(err))
+	// }
 
 	cfg := config.NewConfig()
 
-	err = cfg.ParseFlags()
+	err := cfg.ParseFlags()
 	if err != nil {
 		fmt.Println("Failed to parse command-line flags", zap.Error(err))
 	}
