@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -32,12 +31,10 @@ type API struct {
 func NewAPI(cfg *config.Config, h *handlers.Handlers) *API {
 	router := chi.NewRouter()
 
-	allowedOrigins := strings.Split(os.Getenv("FRONTEND_URL"), ",")
-
 	router.Use(
 		middleware.RequestLogger,
 		cors.Handler(cors.Options{
-			AllowedOrigins:   allowedOrigins,
+			AllowedOrigins:   []string{os.Getenv("FRONTEND_URL")},
 			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
@@ -46,6 +43,7 @@ func NewAPI(cfg *config.Config, h *handlers.Handlers) *API {
 		}),
 	)
 	routes.SetupRoutes(router, h)
+	router.Mount("/api", router)
 
 	return &API{
 		Router: router,

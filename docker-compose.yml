@@ -2,8 +2,6 @@ services:
   postgresql:
     image: postgres:16
     container_name: postgresql
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_DB: project_db
       POSTGRES_USER: user
@@ -18,13 +16,11 @@ services:
   backend:
     build: ./backend
     container_name: backend
-    ports:
-      - "8080:8080"
     environment:
       DSN: postgresql://user:pass@postgresql:5432/project_db?sslmode=disable
       PORT: 8080
       JWT_SECRET: f7afdb469d75f215b99de2d9c7c228a3e6b4ba928651c9c68a5c7b2f8c0fb827
-      FRONTEND_URL: http://localhost:3000,http://frontend:3000
+      FRONTEND_URL: http://localhost
     restart: always
     networks:
       - project_network
@@ -34,9 +30,22 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
-    ports:
-      - "3000:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost/api
     restart: always
+    networks:
+      - project_network
+
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      - frontend
+      - backend
     networks:
       - project_network
 

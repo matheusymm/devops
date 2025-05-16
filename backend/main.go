@@ -6,17 +6,10 @@ import (
 	"example/backend/db"
 	"fmt"
 
-	// "github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
 func main() {
-
-	// err := godotenv.Load("/app/.env")
-	// if err != nil {
-	// 	fmt.Println("Error loading .env file", zap.Error(err))
-	// }
-
 	cfg := config.NewConfig()
 
 	err := cfg.ParseFlags()
