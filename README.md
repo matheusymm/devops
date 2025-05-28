@@ -19,7 +19,12 @@
 - Caddy
 
 ## Instruções
-
 - No diretório raiz da aplicação:
-`docker compose up -d`
+``` Bash
+# Criar o arquivo .env pra o frontend
+cp ./frontend/.env.example ./frontend/.env
+
+# Subir a aplicação
+docker compose up -d
+```
 - Em um navegador acessar `http://localhost`
