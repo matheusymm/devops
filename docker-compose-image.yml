@@ -1,0 +1,55 @@
+services:
+  postgresql:
+    image: postgres:16
+    container_name: postgresql
+    environment:
+      POSTGRES_DB: project_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    restart: unless-stopped
+    networks:
+      - project_network
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ./backend/db/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  backend:
+    image: matheusymm/backend:latest
+    container_name: backend
+    environment:
+      DSN: postgresql://user:pass@postgresql:5432/project_db?sslmode=disable
+      PORT: 8080
+      JWT_SECRET: f7afdb469d75f215b99de2d9c7c228a3e6b4ba928651c9c68a5c7b2f8c0fb827
+      FRONTEND_URL: http://localhost
+    restart: always
+    networks:
+      - project_network
+    depends_on:
+      - postgresql
+
+  frontend:
+    image: matheusymm/frontend:latest
+    container_name: frontend
+    restart: always
+    networks:
+      - project_network
+
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - project_network
+
+networks:
+  project_network:
+    driver: bridge
+
+volumes:
+  postgresql_data:
