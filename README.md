@@ -20,11 +20,19 @@
 
 ## Instruções
 - No diretório raiz da aplicação:
+
 ``` Bash
 # Criar o arquivo .env pra o frontend
 cp ./frontend/.env.example ./frontend/.env
 
-# Subir a aplicação
+# Subir a aplicação sem imagem
 docker compose up -d
 ```
+
+- Também é possível subir a aplicação sem a necessidade do arquivo .env:
+
+``` Bash
+docker compose up -f docker-compose-image.yml -d 
+```
+
 - Em um navegador acessar `http://localhost`
