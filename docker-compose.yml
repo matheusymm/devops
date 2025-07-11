@@ -30,8 +30,6 @@ services:
   frontend:
     build: ./frontend
     container_name: frontend
-    environment:
-      VITE_API_BASE_URL: http://localhost/api
     restart: always
     networks:
       - project_network
