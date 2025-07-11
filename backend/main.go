@@ -4,31 +4,36 @@ import (
 	"example/backend/api"
 	"example/backend/config"
 	"example/backend/db"
-	"fmt"
+	"log"
 
 	"go.uber.org/zap"
 )
 
 func main() {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("can't initialize zap logger: %v", err)
+	}
+	defer logger.Sync()
+
 	cfg := config.NewConfig()
-
-	err := cfg.ParseFlags()
-	if err != nil {
-		fmt.Println("Failed to parse command-line flags", zap.Error(err))
+	if err := cfg.ParseFlags(); err != nil {
+		logger.Fatal("failed to parse command-line flags", zap.Error(err))
 	}
 
-	db, err := db.Connect(cfg)
+	database, err := db.Connect(cfg)
 	if err != nil {
-		fmt.Println("Failed to connect to the database", zap.Error(err))
-		panic(err)
+		logger.Fatal("failed to connect to the database", zap.Error(err))
 	}
-	defer db.Close()
+	defer database.Close()
+	logger.Info("database connection established successfully")
 
-	hr := cfg.InitializeHandlers(cfg.InitializeRepositories(db))
-	srv := api.NewAPI(cfg, hr)
+	repos := cfg.InitializeRepositories(database)
+	handlers := cfg.InitializeHandlers(repos)
+	srv := api.NewAPI(cfg, handlers)
 
-	err = srv.Run()
-	if err != nil {
-		fmt.Println("Failed to start the server", zap.Error(err))
+	logger.Info("starting server", zap.String("address", cfg.Port))
+	if err := srv.Run(); err != nil {
+		logger.Fatal("failed to start the server", zap.Error(err))
 	}
 }

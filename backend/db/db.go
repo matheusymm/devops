@@ -3,29 +3,41 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"example/backend/config"
-	"fmt"
 
 	_ "github.com/lib/pq"
 )
 
 func Connect(cfg *config.Config) (*sql.DB, error) {
-	fmt.Printf("Connecting to database with DSN: %s\n", cfg.DB.DSN)
-	for {
-		db, err := sql.Open("postgres", cfg.DB.DSN)
-		if err == nil {
-			if err = db.Ping(); err == nil {
-				break
-			}
+	var db *sql.DB
+	var err error
+
+	const maxRetries = 10
+	for i := 0; i < maxRetries; i++ {
+		db, err = sql.Open("postgres", cfg.DB.DSN)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open database connection: %w", err)
 		}
-		fmt.Printf("Waiting for postgresql...")
-		time.Sleep(2 * time.Second)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err = db.PingContext(ctx)
+		if err == nil {
+			fmt.Println("Successfully connected to the database.")
+			break
+		}
+
+		db.Close()
+		fmt.Printf("Could not connect to database: %v. Retrying in 10 seconds...\n", err)
+		time.Sleep(10 * time.Second)
 	}
-	db, err := sql.Open("postgres", cfg.DB.DSN)
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to database after %d retries: %w", maxRetries, err)
 	}
 
 	db.SetMaxOpenConns(cfg.DB.MaxOpenConns)
@@ -33,22 +45,14 @@ func Connect(cfg *config.Config) (*sql.DB, error) {
 
 	maxIdleTime := cfg.DB.MaxIdleTime
 	if maxIdleTime == "" {
-		maxIdleTime = "5m" // Default to 5 minutes if not set
+		maxIdleTime = "5m"
 	}
 	duration, err := time.ParseDuration(maxIdleTime)
 	if err != nil {
-		return nil, err
+		db.Close()
+		return nil, fmt.Errorf("invalid value for DB_MAX_IDLE_TIME: %w", err)
 	}
-
 	db.SetConnMaxIdleTime(duration)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err = db.PingContext(ctx)
-	if err != nil {
-		return nil, err
-	}
 
 	return db, nil
 }
