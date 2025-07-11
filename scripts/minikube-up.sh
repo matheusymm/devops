@@ -10,7 +10,7 @@ minikube_init() {
 
 minikube_init
 
-cd k8s/db
+cd k8s/postgresql
 kubectl apply -f secret.yaml; kubectl create -f pv.yaml; kubectl create -f pvc.yaml; kubectl apply -f configmap.yaml; kubectl apply -f deployment.yaml; kubectl apply -f service.yaml;
 
 cd ../backend
