@@ -36,23 +36,23 @@
 
     - `pvc.yaml`:  define uma solicitação de armazenamento para o banco de dados.
 
-    - `secret.yaml`: armazena e gerencia dados sensíveis do banco de dados, como usuário e senha de acesso.
+    - `secret.yaml`: define os dados sensíveis do banco de dados, como usuário e senha de acesso.
 
-    - `service.yaml`: define o pod de banco de dados como um ClusterIP.
+    - `service.yaml`: expõe a aplicação de banco de dados com o tipo ClusterIP.
 
 - **Backend**:
 
     - `deployment.yaml`: define as configurações do pod de backend.
 
-    - `secret.yaml`: armazena e gerencia dados sensíveis do backend, como jwt secret e a url de acesso ao banco de dados.
+    - `secret.yaml`: define os dados sensíveis do backend, como jwt secret e a url de acesso ao banco de dados.
 
-    - `service.yaml`: define o pod de backend como um ClusterIP.
+    - `service.yaml`: expõe a aplicação de backend com o tipo ClusterIP.
 
 - **Frontend**:
 
     - `deployment.yaml`: define as configurações do pod de frontend.
 
-    - `service.yaml`: define o pod de frontend como um ClusterIP.
+    - `service.yaml`: expõe a aplicação de frontend com o tipo ClusterIP.
 
 - **Ingress**:
 
