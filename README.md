@@ -97,6 +97,16 @@ docker compose up -f docker-compose-image.yml -d
 ./scripts/minikube-up.sh
 ```
 
+- **Importante:** Para acessar a aplicação é necessário configurar o host para seu ambiente local:
+
+```
+minikube ip
+
+# Adicionar o IP do comando anterior ao final do arquivo
+# x.x.x.x   k8s.local
+sudo vim /etc/hosts
+```
+
 - Em um navegador acessar `http://k8s.local`
 
 ## Instruções para K8S
@@ -107,6 +117,16 @@ docker compose up -f docker-compose-image.yml -d
 ./scripts/minikube-init.sh 
 
 ./scripts/helm-up.sh
+```
+
+- **Importante:** Para acessar a aplicação é necessário configurar o host para seu ambiente local:
+
+```
+minikube ip
+
+# Adicionar o IP do comando anterior ao final do arquivo
+# x.x.x.x   k8s.local
+sudo vim /etc/hosts
 ```
 
 - Em um navegador acessar `http://k8s.local`
