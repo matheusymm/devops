@@ -1,0 +1,1 @@
+helm install mood-tracker mood-tracker-chart

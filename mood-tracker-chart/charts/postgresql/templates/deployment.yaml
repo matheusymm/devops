@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.global.postgresql.name }}
+  labels:
+    app: {{ .Values.global.postgresql.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.global.postgresql.name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.global.postgresql.name }}
+    spec:
+      containers:
+        - name: {{ .Values.global.postgresql.name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.global.postgresql.name }}-configmap
+                  key: database
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresql.name }}-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresql.name }}-secret
+                  key: password
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1"
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+          volumeMounts:
+              - name: {{ .Values.global.postgresql.name }}-persistent-storage
+                mountPath: /var/lib/{{ .Values.global.postgresql.name }}/data
+              - name: {{ .Values.global.postgresql.name }}-initdb
+                mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: {{ .Values.global.postgresql.name }}-persistent-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.postgresql.name }}-pv-claim
+        - name: {{ .Values.global.postgresql.name }}-initdb
+          configMap:
+            name: {{ .Values.global.postgresql.name }}-configmap

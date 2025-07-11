@@ -1,0 +1,14 @@
+apiVersion: v2
+name: mood-tracker
+description: A Helm chart for Mood Tracker application
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+
+dependencies:
+  - name: "backend"
+    version: "0.1.0"
+  - name: "postgresql"
+    version: "0.1.0"
+  - name: "frontend"
+    version: "0.1.0"
